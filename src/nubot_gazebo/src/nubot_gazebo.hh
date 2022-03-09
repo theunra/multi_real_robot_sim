@@ -10,6 +10,8 @@
 #include <gazebo/common/Events.hh>
 #include <sdf/sdf.hh>
 
+#include <ignition/math.hh>
+
 #include <ros/callback_queue.h>         // Custom Callback Queue
 #include <ros/subscribe_options.h>
 #include <gazebo_msgs/ModelStates.h>
@@ -46,16 +48,15 @@ enum nubot_substate
     ROTATE_BALL
 };
 
-namespace gazebo{
    struct Pose
    {
-       math::Vector3    position;
-       math::Quaternion orient;
+       ignition::math::Vector3d    position;
+       ignition::math::Quaterniond orient;
    };
    struct Twist
    {
-       math::Vector3    linear;
-       math::Vector3    angular;
+       ignition::math::Vector3d    linear;
+       ignition::math::Vector3d    angular;
    };
 
    struct model_state
@@ -72,14 +73,14 @@ namespace gazebo{
        std::vector<nubot::DPoint> world_obs_;
    };
 
-  class NubotGazebo : public ModelPlugin
+  class NubotGazebo : public gazebo::ModelPlugin
   {      
     private: 
 
-        physics::WorldPtr           world_;             // A pointer to the gazebo world.
-        physics::ModelPtr           robot_model_;       // Pointer to the model
-        physics::ModelPtr           ball_model_;    // Pointer to the football
-        physics::LinkPtr            ball_link_;     //Pointer to the football link
+        gazebo::physics::WorldPtr           world_;             // A pointer to the gazebo world.
+        gazebo::physics::ModelPtr           robot_model_;       // Pointer to the model
+        gazebo::physics::ModelPtr           ball_model_;    // Pointer to the football
+        gazebo::physics::LinkPtr            ball_link_;     //Pointer to the football link
         
         ros::NodeHandle*            rosnode_;           // A pointer to the ROS node. 
         ros::Subscriber             ModelStates_sub_;
@@ -95,7 +96,7 @@ namespace gazebo{
         boost::mutex                srvCB_lock_;        // A mutex to lock access to fields that are used in ROS service callbacks
         ros::CallbackQueue          message_queue_;     // Custom Callback Queue. Details see http://wiki.ros.org/roscpp/Overview/Callbacks%20and%20Spinning
         ros::CallbackQueue          service_queue_;     // Custom Callback Queue
-        event::ConnectionPtr        update_connection_;         // Pointer to the update event connection
+        gazebo::event::ConnectionPtr        update_connection_;         // Pointer to the update event connection
         
         gazebo_msgs::ModelStates    model_states_;          // Container for the ModelStates msg
         model_state                 robot_state_;
@@ -107,11 +108,11 @@ namespace gazebo{
         //common::Time                  receive_sim_time_;
         std_msgs::Float64MultiArray   debug_msgs_;
 
-        math::Vector3               desired_rot_vector_;
-        math::Vector3               desired_trans_vector_;
-        math::Vector3               nubot_ball_vec_;
-        math::Vector3               kick_vector_world_;
-        math::Rand                  rand_;
+        ignition::math::Vector3d               desired_rot_vector_;
+        ignition::math::Vector3d               desired_trans_vector_;
+        ignition::math::Vector3d               nubot_ball_vec_;
+        ignition::math::Vector3d               kick_vector_world_;
+        ignition::math::Rand                  rand_;
         std::string                 robot_namespace_;   // robot namespace. Not used yet.
         std::string                 model_name_;
         std::string                 ball_name_;
@@ -189,7 +190,7 @@ namespace gazebo{
         /// \brief Nubot moving fuction: rotation + translation
         /// \param[in] linear_vel_vector translation velocity 3D vector
         /// \param[in] angular_vel_vector rotation velocity 3D vector
-        void nubot_locomotion(math::Vector3 linear_vel_vector, math::Vector3 angular_vel_vector);
+        void nubot_locomotion(ignition::math::Vector3d linear_vel_vector, ignition::math::Vector3d angular_vel_vector);
 
         /// \brief Nubot dribbling ball function. The football follows nubot movement.
         void dribble_ball(void);
@@ -241,7 +242,7 @@ namespace gazebo{
     protected:   
         /// \brief Load the controller.
         /// Required by model plugin. Will be called secondly
-        void Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/) ;
+        void Load(gazebo::physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/) ;
 
         /// \brief Update the controller. It is running every simulation iteration.
         /// [realtime factor] = [realtime update rate] * [max step size].
@@ -251,6 +252,6 @@ namespace gazebo{
         /// Not required by model plugin. It is triggered when the world resets.
         virtual void Reset();
   };
-}
+
 
 #endif //! NUBOT_GAZEBO_HH
