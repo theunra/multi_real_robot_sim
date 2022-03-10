@@ -1,2 +1,0 @@
-joystick_drivers/joy:joystick_drivers/joystick_drivers:nubot_common:nubot_description:nubot_gazebo
--DCATKIN_DEVEL_PREFIX=/home/theunra/multi_real_robot_sim/devel -DCMAKE_INSTALL_PREFIX=/home/theunra/multi_real_robot_sim/install -G Unix Makefiles

@@ -15,7 +15,7 @@
 const double        g = 9.8;                    // gravity coefficient
 const double        m = 0.41;                   // ball mass (kg)
 
-GZ_REGISTER_MODEL_PLUGIN(BallGazebo)
+
 
 BallGazebo::BallGazebo()
 {}
@@ -23,7 +23,7 @@ BallGazebo::BallGazebo()
 BallGazebo::~BallGazebo()
 {}
 
-void BallGazebo::Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
+void BallGazebo::Load(gazebo::physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
 {
     world_ = _parent->GetWorld();
     football_model_ = _parent;
@@ -39,13 +39,12 @@ void BallGazebo::Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
 
     joy_sub_ =rosnode_->subscribe<sensor_msgs::Joy>("joy", 2, &BallGazebo::joyCallback, this);
 
-    update_connection_ = event::Events::ConnectWorldUpdateBegin(
+    update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
         boost::bind(&BallGazebo::UpdateChild, this));
 }
 
 void BallGazebo::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 {
-    /*速度指令*/
     vel_y_ = joy->axes[idx_X]*5;
     vel_x_ = -joy->axes[idx_Y]*5;
 }
@@ -98,13 +97,13 @@ void BallGazebo::detect_ball_out(void)
 
     if(fabs(pos_x)>field_length_/2.0)
     {
-        gazebo::math::Pose  target_pose( ignition::math::Vector3d (a*(field_length_/2.0-0.02), pos_y, 0.12), math::Quaternion(0,0,0) );
+        ignition::math::Pose3d  target_pose( ignition::math::Vector3d (a*(field_length_/2.0-0.02), pos_y, 0.12), ignition::math::Quaterniond(0,0,0) );
         football_model_->SetWorldPose(target_pose);
         football_model_->SetLinearVel(ignition::math::Vector3d::Zero);
     }
     else if(fabs(pos_y) > field_width_/2.0)
     {
-        gazebo::math::Pose  target_pose( ignition::math::Vector3d (pos_x, b*(field_width_/2.0 - 0.02), 0.12), math::Quaternion(0,0,0) );
+        ignition::math::Pose3d  target_pose( ignition::math::Vector3d (pos_x, b*(field_width_/2.0 - 0.02), 0.12), ignition::math::Quaterniond(0,0,0) );
         football_model_->SetWorldPose(target_pose);
         football_model_->SetLinearVel(ignition::math::Vector3d::Zero);
     }

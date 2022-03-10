@@ -19,21 +19,18 @@
 
 #include "nubot/core/core.hpp"
 
-
-namespace gazebo{
-
-  class BallGazebo : public ModelPlugin
+  class BallGazebo : public gazebo::ModelPlugin
   {
     private:
 
-        physics::WorldPtr           world_;             // A pointer to the gazebo world.
-        physics::ModelPtr           football_model_;       // Pointer to the model
+        gazebo::physics::WorldPtr           world_;             // A pointer to the gazebo world.
+        gazebo::physics::ModelPtr           football_model_;       // Pointer to the model
 
         ros::NodeHandle*            rosnode_;           // A pointer to the ROS node.
         ros::Subscriber             joy_sub_;
-        event::ConnectionPtr        update_connection_;         // Pointer to the update event connection
+        gazebo::event::ConnectionPtr        update_connection_;         // Pointer to the update event connection
         std::string                 football_chassis_;
-        physics::LinkPtr            football_link_;     //Pointer to the football link
+        gazebo::physics::LinkPtr            football_link_;     //Pointer to the football link
 
         double                      vel_x_;
         double                      vel_y_;
@@ -61,12 +58,13 @@ namespace gazebo{
     protected:
         /// \brief Load the controller.
         /// Required by model plugin. Will be called secondly
-        void Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/);
+        void Load(gazebo::physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/);
 
         /// \brief Update the controller. It is running every simulation iteration.
         /// [realtime factor] = [realtime update rate] * [max step size].
         virtual void UpdateChild();
+        
   };
-}
+  GZ_REGISTER_MODEL_PLUGIN(BallGazebo)
 
 #endif //! BALL_GAZEBO_HH

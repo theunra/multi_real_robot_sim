@@ -165,7 +165,7 @@ void NubotGazebo::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf)
     service_callback_queue_thread_ = boost::thread( boost::bind( &NubotGazebo::service_queue_thread,this ) );
 
     // This event is broadcast every simulation iteration.
-    update_connection_ = event::Events::ConnectWorldUpdateBegin(
+    update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
                 boost::bind(&NubotGazebo::update_child, this));
 
     // Output info
@@ -286,41 +286,41 @@ bool NubotGazebo::update_model_info(void)
     {
         // Get football and nubot's pose and twist
         ball_state_.model_name = ball_name_ ;
-        ball_state_.pose.position.X()     = model_states_.pose[ball_index_].position.X();
-        ball_state_.pose.position.Y()     = model_states_.pose[ball_index_].position.Y();
-        ball_state_.pose.position.Z()     = model_states_.pose[ball_index_].position.Z();
-        ball_state_.pose.orient.W()  = model_states_.pose[ball_index_].orientation.W();
-        ball_state_.pose.orient.X()  = model_states_.pose[ball_index_].orientation.X();
-        ball_state_.pose.orient.Y()  = model_states_.pose[ball_index_].orientation.Y();
-        ball_state_.pose.orient.Z()  = model_states_.pose[ball_index_].orientation.Z();
-        ball_state_.twist.linear.X()      = model_states_.twist[ball_index_].linear.X();
-        ball_state_.twist.linear.Y()      = model_states_.twist[ball_index_].linear.Y();
-        ball_state_.twist.linear.Z()      = model_states_.twist[ball_index_].linear.Z();
-        ball_state_.twist.angular.X()     = model_states_.twist[ball_index_].angular.X();
-        ball_state_.twist.angular.Y()     = model_states_.twist[ball_index_].angular.Y();
-        ball_state_.twist.angular.Z()     = model_states_.twist[ball_index_].angular.Z();
+        ball_state_.pose.position.X()     = model_states_.pose[ball_index_].position.x;
+        ball_state_.pose.position.Y()     = model_states_.pose[ball_index_].position.y;
+        ball_state_.pose.position.Z()     = model_states_.pose[ball_index_].position.z;
+        ball_state_.pose.orient.W()  = model_states_.pose[ball_index_].orientation.w;
+        ball_state_.pose.orient.X()  = model_states_.pose[ball_index_].orientation.x;
+        ball_state_.pose.orient.Y()  = model_states_.pose[ball_index_].orientation.y;
+        ball_state_.pose.orient.Z()  = model_states_.pose[ball_index_].orientation.z;
+        ball_state_.twist.linear.X()      = model_states_.twist[ball_index_].linear.x;
+        ball_state_.twist.linear.Y()      = model_states_.twist[ball_index_].linear.y;
+        ball_state_.twist.linear.Z()      = model_states_.twist[ball_index_].linear.z;
+        ball_state_.twist.angular.X()     = model_states_.twist[ball_index_].angular.x;
+        ball_state_.twist.angular.Y()     = model_states_.twist[ball_index_].angular.y;
+        ball_state_.twist.angular.Z()     = model_states_.twist[ball_index_].angular.z;
 
         robot_state_.model_name = ball_name_ ;
-        robot_state_.pose.position.X()    = model_states_.pose[robot_index_].position.X();
-        robot_state_.pose.position.Y()    = model_states_.pose[robot_index_].position.Y();
-        robot_state_.pose.position.Z()    = model_states_.pose[robot_index_].position.Z();
-        robot_state_.pose.orient.W() = model_states_.pose[robot_index_].orientation.W();
-        robot_state_.pose.orient.X() = model_states_.pose[robot_index_].orientation.X();
-        robot_state_.pose.orient.Y() = model_states_.pose[robot_index_].orientation.Y();
-        robot_state_.pose.orient.Z() = model_states_.pose[robot_index_].orientation.Z();
-        robot_state_.twist.linear.X()     = model_states_.twist[robot_index_].linear.X();
-        robot_state_.twist.linear.Y()     = model_states_.twist[robot_index_].linear.Y();
-        robot_state_.twist.linear.Z()     = model_states_.twist[robot_index_].linear.Z();
-        robot_state_.twist.angular.X()    = model_states_.twist[robot_index_].angular.X();
-        robot_state_.twist.angular.Y()    = model_states_.twist[robot_index_].angular.Y();
-        robot_state_.twist.angular.Z()    = model_states_.twist[robot_index_].angular.Z();
+        robot_state_.pose.position.X()    = model_states_.pose[robot_index_].position.x;
+        robot_state_.pose.position.Y()    = model_states_.pose[robot_index_].position.y;
+        robot_state_.pose.position.Z()    = model_states_.pose[robot_index_].position.z;
+        robot_state_.pose.orient.W() = model_states_.pose[robot_index_].orientation.w;
+        robot_state_.pose.orient.X() = model_states_.pose[robot_index_].orientation.x;
+        robot_state_.pose.orient.Y() = model_states_.pose[robot_index_].orientation.y;
+        robot_state_.pose.orient.Z() = model_states_.pose[robot_index_].orientation.z;
+        robot_state_.twist.linear.X()     = model_states_.twist[robot_index_].linear.x;
+        robot_state_.twist.linear.Y()     = model_states_.twist[robot_index_].linear.y;
+        robot_state_.twist.linear.Z()     = model_states_.twist[robot_index_].linear.z;
+        robot_state_.twist.angular.X()    = model_states_.twist[robot_index_].angular.x;
+        robot_state_.twist.angular.Y()    = model_states_.twist[robot_index_].angular.y;
+        robot_state_.twist.angular.Z()    = model_states_.twist[robot_index_].angular.z;
 
         // calculate vector from nubot to football
         nubot_ball_vec_ = ball_state_.pose.position - robot_state_.pose.position;
         nubot_ball_vec_len_ = nubot_ball_vec_.Length();
 
         // transform kick_vector_nubot in world frame
-        ignition::math::Quaterniond    rotation_quaternion = nubot_state_.pose.orientation;
+        ignition::math::Quaterniond    rotation_quaternion = robot_state_.pose.orient;
         ignition::math::Matrix3d RotationMatrix3(rotation_quaternion);
         kick_vector_world_ = RotationMatrix3 * kick_vector_robot; // vector from nubot origin to kicking mechanism in world frame
         // ROS_INFO("kick_vector_world_: %f %f %f",kick_vector_world_.x, kick_vector_world_.y, kick_vector_world_.z);
@@ -360,7 +360,7 @@ bool NubotGazebo::update_model_info(void)
                 geometry_msgs::Twist robot_twist = model_states_.twist[i];
                 ignition::math::Quaterniond rot_qua(robot_pose.orientation.w, robot_pose.orientation.x,
                                          robot_pose.orientation.y, robot_pose.orientation.z);
-                double heading_theta = rot_qua.GetYaw();
+                double heading_theta = rot_qua.Yaw();
                 teamate_info_.header.seq++;
                 teamate_info_.header.stamp = ros::Time::now();
                 teamate_info_.AgentID       = robot_id;
@@ -575,7 +575,7 @@ void NubotGazebo::dribble_ball(void)
 
     target_pos.Z() = 0.12;
     //ROS_INFO("target pos:%f %f %f",target_pos.x, target_pos.y, target_pos.z);
-    gazebo::math::Pose          target_pose(target_pos, target_rot);
+    ignition::math::Pose3d          target_pose(target_pos, target_rot);
     ball_model_->SetLinearVel(ignition::math::Vector3d(0,0,0));
     ball_model_->SetWorldPose(target_pose);
     ball_state_.twist.linear = robot_state_.twist.linear;
