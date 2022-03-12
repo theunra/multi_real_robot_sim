@@ -14,7 +14,12 @@
 #define ZERO_VECTOR ignition::math::Vector3d::Zero
 #define PI 3.14159265
 
+#if 0
 #define CM2M_CONVERSION 0.01
+#else
+#define CM2M_CONVERSION 1
+#endif
+
 #define M2CM_CONVERSION 100
 
 enum {NOTSEEBALL = 0, SEEBALLBYOWN = 1,SEEBALLBYOTHERS = 2};
