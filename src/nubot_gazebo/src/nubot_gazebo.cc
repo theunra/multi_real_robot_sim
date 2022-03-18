@@ -104,7 +104,7 @@ void NubotGazebo::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf)
     rosnode_ = new ros::NodeHandle(robot_namespace_);
     rosnode_->param<std::string>("/football/name",                   ball_name_,             std::string("football") );
     rosnode_->param<std::string>("/football/chassis_link",           ball_chassis_,          std::string("football::ball") );
-    rosnode_->param<std::string>("/cyan/prefix",                     cyan_pre_,              std::string("nubot"));
+    rosnode_->param<std::string>("/cyan/prefix",                     cyan_pre_,              std::string("fukuro"));
     rosnode_->param<std::string>("/magenta/prefix",                  mag_pre_,              std::string("rival"));
     rosnode_->param<double>("/general/dribble_distance_thres",  dribble_distance_thres_,    0.50);
     rosnode_->param<double>("/general/dribble_angle_thres",     dribble_angle_thres_,       30.0);
@@ -145,7 +145,7 @@ void NubotGazebo::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf)
     ModelStates_sub_ = rosnode_->subscribe(so1);
 
     ros::SubscribeOptions so2 = ros::SubscribeOptions::create<nubot_common::VelCmd>(
-                "nubotcontrol/velcmd", 100, boost::bind( &NubotGazebo::vel_cmd_CB,this,_1),
+                "vel_cmd", 100, boost::bind( &NubotGazebo::vel_cmd_CB,this,_1),
                 ros::VoidPtr(), &message_queue_);
     Velcmd_sub_ = rosnode_->subscribe(so2);
 
@@ -528,7 +528,8 @@ bool NubotGazebo::shoot_control_servive( nubot_common::Shoot::Request  &req,
 {
     srvCB_lock_.lock();
 
-    force_ = (double)req.strength;
+    force_ = 5.0;
+    //force_ = (double)req.strength;
     mode_ = (int)req.ShootPos;
     if(force_ > 15.0)
     {

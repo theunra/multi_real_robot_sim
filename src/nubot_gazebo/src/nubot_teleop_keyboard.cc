@@ -197,7 +197,7 @@ void NubotTeleopKey::keyLoop()
         {
             nubot_common::Shoot s;
             s.request.ShootPos = mode_;
-            s.request.strength = KICK_BALL_VEL;
+            //s.request.strength = KICK_BALL_VEL;
             shoot_client_.call(s);
             shot_flag_ = false;
             if(s.response.ShootIsDone)
