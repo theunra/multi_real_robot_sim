@@ -8,8 +8,8 @@ football_name=$(rosparam get /football/name)
 magenta_prefix=$(rosparam get /magenta/prefix)
 cyan_prefix=$(rosparam get /cyan/prefix)
 		                               
-cyan_x=(0 -8.5 -2 -2 -5 -5 )  # the first one is for goal-keeper
-cyan_y=(0 0 1 -1 2 -2 )       # the first one is for goal-keeper 
+cyan_x=(0 4    4   4 -5 -5 )  # the first one is for goal-keeper
+cyan_y=(0 5.5 -5.5 5.5 2 -2 )       # the first one is for goal-keeper 
 magenta_x=(0 8.5 2 2 5 5)      # the first one is not useful now
 magenta_y=(0 0 1 -1 2 -2 )     # the first one is not useful now-keeper
 
@@ -20,7 +20,7 @@ rosrun gazebo_ros spawn_model -file $(rospack find nubot_description)/models/foo
 #sleep 1
 
 ### spawn cyan robots
-for ((i=1; i<=cyan_num; ++i))
+for ((i=2; i<=cyan_num+1; ++i))
 do
     rosrun gazebo_ros spawn_model -file $(rospack find nubot_description)/models/${cyan_prefix}${i}/model.sdf -sdf \
                                   -model ${cyan_prefix}${i} \

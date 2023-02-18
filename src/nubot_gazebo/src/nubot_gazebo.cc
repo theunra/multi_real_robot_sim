@@ -144,18 +144,18 @@ void NubotGazebo::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf)
                 ros::VoidPtr(), &message_queue_);
     ModelStates_sub_ = rosnode_->subscribe(so1);
 
-    ros::SubscribeOptions so2 = ros::SubscribeOptions::create<nubot_common::VelCmd>(
-                "vel_cmd", 100, boost::bind( &NubotGazebo::vel_cmd_CB,this,_1),
+    ros::SubscribeOptions so2 = ros::SubscribeOptions::create<fukuro_common::VelCmd>(
+                "velcmd", 100, boost::bind( &NubotGazebo::vel_cmd_CB,this,_1),
                 ros::VoidPtr(), &message_queue_);
     Velcmd_sub_ = rosnode_->subscribe(so2);
 
     // Service Servers
-    ros::AdvertiseServiceOptions aso1 = ros::AdvertiseServiceOptions::create<nubot_common::BallHandle>(
+    ros::AdvertiseServiceOptions aso1 = ros::AdvertiseServiceOptions::create<fukuro_common::SimBallHandle>(
                 "BallHandle", boost::bind(&NubotGazebo::ball_handle_control_service, this, _1, _2),
                 ros::VoidPtr(), &service_queue_);
     ballhandle_server_ =   rosnode_->advertiseService(aso1);
 
-    ros::AdvertiseServiceOptions aso2 = ros::AdvertiseServiceOptions::create<nubot_common::Shoot>(
+    ros::AdvertiseServiceOptions aso2 = ros::AdvertiseServiceOptions::create<fukuro_common::SimShoot>(
                 "Shoot", boost::bind(&NubotGazebo::shoot_control_servive, this, _1, _2),
                 ros::VoidPtr(), &service_queue_);
     shoot_server_ =   rosnode_->advertiseService(aso2);
@@ -464,19 +464,19 @@ void NubotGazebo::nubot_locomotion(ignition::math::Vector3d linear_vel_vector, i
     judge_nubot_stuck_ = 1;                                                 // only afetr nubot tends to move can I judge if it is stuck
 }
 
-void NubotGazebo::vel_cmd_CB(const nubot_common::VelCmd::ConstPtr& cmd)
+void NubotGazebo::vel_cmd_CB(const fukuro_common::VelCmd::ConstPtr& cmd)
 {
     msgCB_lock_.lock();
 
     if(flip_cord_)
     {
-        Vx_cmd_ = -cmd->Vx * CM2M_CONVERSION;
-        Vy_cmd_ = -cmd->Vy * CM2M_CONVERSION;
+        Vx_cmd_ = -cmd->vx * CM2M_CONVERSION;
+        Vy_cmd_ = -cmd->vy * CM2M_CONVERSION;
     }
     else
     {
-        Vx_cmd_ = cmd->Vx * CM2M_CONVERSION;
-        Vy_cmd_ = cmd->Vy * CM2M_CONVERSION;
+        Vx_cmd_ = cmd->vx * CM2M_CONVERSION;
+        Vy_cmd_ = cmd->vy * CM2M_CONVERSION;
     }
     w_cmd_  = cmd->w;
     ignition::math::Vector3d Vx_nubot = Vx_cmd_ * kick_vector_world_;
@@ -491,8 +491,8 @@ void NubotGazebo::vel_cmd_CB(const nubot_common::VelCmd::ConstPtr& cmd)
     msgCB_lock_.unlock();
 }
 
-bool NubotGazebo::ball_handle_control_service(nubot_common::BallHandle::Request  &req,
-                                              nubot_common::BallHandle::Response &res)
+bool NubotGazebo::ball_handle_control_service(fukuro_common::SimBallHandle::Request  &req,
+                                              fukuro_common::SimBallHandle::Response &res)
 {
     srvCB_lock_.lock();
 
@@ -523,8 +523,8 @@ bool NubotGazebo::ball_handle_control_service(nubot_common::BallHandle::Request 
     return true;
 }
 
-bool NubotGazebo::shoot_control_servive( nubot_common::Shoot::Request  &req,
-                                         nubot_common::Shoot::Response &res )
+bool NubotGazebo::shoot_control_servive( fukuro_common::SimShoot::Request  &req,
+                                         fukuro_common::SimShoot::Response &res )
 {
     srvCB_lock_.lock();
 
@@ -569,7 +569,17 @@ bool NubotGazebo::shoot_control_servive( nubot_common::Shoot::Request  &req,
 
 void NubotGazebo::dribble_ball(void)
 {
-
+#if 0   // 1. Set pose
+    math::Quaternion    target_rot = robot_model_->WorldPose().Rot();
+    math::Matrix3       RotationMatrix3 = target_rot.GetAsMatrix3();
+    kick_vector_world_ = RotationMatrix3 * kick_vector_robot;
+    ignition::math::Vector3d       relative_pos = kick_vector_world_* 0.43;
+    ignition::math::Vector3d       target_pos = robot_model_->WorldPose().Pos() + relative_pos;
+    ignition::math::Pose2d          target_pose(target_pos, target_rot);
+    ball_model_->SetWorldPose(target_pose);
+    //ROS_WARN("nubot_ball_distance:%f", (nubot_model_->GetWorldPose().pos - football_model_->GetWorldPose().pos).Length());
+    ball_state_.twist.linear = robot_state_.twist.linear;
+#endif
 #if 1
     ignition::math::Quaterniond    target_rot = robot_state_.pose.orient;
     ignition::math::Vector3d       relative_pos = kick_vector_world_* 0.43;
@@ -579,7 +589,7 @@ void NubotGazebo::dribble_ball(void)
     else
         target_pos = robot_state_.pose.position + relative_pos;
 
-    target_pos.Z() = 0.12;
+    target_pos.Z(0.12);
     //ROS_INFO("target pos:%f %f %f",target_pos.x, target_pos.y, target_pos.z);
     ignition::math::Pose3d          target_pose(target_pos, target_rot);
     ball_model_->SetLinearVel(ignition::math::Vector3d(0,0,0));
@@ -588,22 +598,22 @@ void NubotGazebo::dribble_ball(void)
 #endif
 #if 0
     const static double desired_nubot_football_vector_length =  dribble_distance_thres_;
-    if(ball_state_.pose.position.z > 0.3)   // if football is in the air, cannot dribble
+    if(ball_state_.pose.position.Z() > 0.3)   // if football is in the air, cannot dribble
     {
-        ROS_ERROR("dribble_ball(): ball is in the air at %f; return!", ball_state_.pose.position.z);
+        ROS_ERROR("dribble_ball(): ball is in the air at %f; return!", ball_state_.pose.position.Z());
         return;
     }
 
-    ignition::math::Vector3d     nubot_linear_vel = nubot_model_->GetWorldLinearVel();
-    ignition::math::Vector3d     nubot_angular_vel = nubot_model_->GetWorldAngularVel();
-    nubot_linear_vel.z=0; nubot_angular_vel.x=0; nubot_angular_vel.y=0;
+    ignition::math::Vector3d     nubot_linear_vel = robot_model_->WorldLinearVel();
+    ignition::math::Vector3d     nubot_angular_vel = robot_model_->WorldAngularVel();
+    nubot_linear_vel.Z(0); nubot_angular_vel.X(0); nubot_angular_vel.Y(0);
     // Set up the direction from nubot to football. Let vector lies in x-y plane
-    nubot_football_vector_.z = 0;                             // don't point to the air
-    ignition::math::Vector3d     perpencular_vel = nubot_angular_vel.Cross(nubot_football_vector_);
+    nubot_ball_vec_.Z(0);                             // don't point to the air
+    ignition::math::Vector3d     perpencular_vel = nubot_angular_vel.Cross(nubot_ball_vec_);
     ignition::math::Vector3d     football_vel = nubot_linear_vel + perpencular_vel;
-    football_model_->SetLinearVel(football_vel);
+    ball_model_->SetLinearVel(football_vel);
 
-    ROS_INFO("%s dribble_ball(): dribbling ball. ball vel:%f %f", model_name_.c_str(),football_vel.x, football_vel.y);
+    ROS_INFO("%s dribble_ball(): dribbling ball. ball vel:%f %f", model_name_.c_str(),football_vel.X(), football_vel.Y());
 #endif
 }
 
@@ -643,19 +653,22 @@ void NubotGazebo::kick_ball(int mode, double vel=20.0)
         double vx = vx_thres/2.0;//>vel ? vel : vx_thres/2.0;                            // initial x velocity.CAN BE TUNED
         double b = kick_goal_height/D + g*D/(2.0*vx*vx);
 
+        ROS_INFO("D vx_th vx b : %f %f %f %f",D, vx_thres,vx,b);
+
         ROS_INFO("%s crosspoint:(%f %f) vx: %f", model_name_.c_str(),
                  crosspoint.x_, crosspoint.y_, vx);
-        if( fabs(crosspoint.y_) < 10)
-        {
+        
+        // if( fabs(crosspoint.y_) < 10)
+        // {
             ignition::math::Vector3d kick_vector;
             if(flip_cord_)
                 kick_vector = ignition::math::Vector3d(-vx*kick_vector_world_.X(), -vx*kick_vector_world_.Y(), b*vx);
             else
                 kick_vector = ignition::math::Vector3d(vx*kick_vector_world_.X(), vx*kick_vector_world_.Y(), b*vx);
             ball_model_->SetLinearVel(kick_vector);
-        }
-        else
-            ROS_FATAL("CANNOT SHOOT. crosspoint.y is too big!");
+        // }
+        // else
+            // ROS_FATAL("CANNOT SHOOT. crosspoint.y is too big!");
     }
     else
     {

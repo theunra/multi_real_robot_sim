@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sdf version="1.4">
-   <model name="nubot3">
+   <model name="fukuro3">
       <static>false</static>
       <pose>0 0 0.01 0 0 0</pose>
       <link name="chassis">

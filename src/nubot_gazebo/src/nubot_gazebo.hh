@@ -17,9 +17,9 @@
 #include <gazebo_msgs/ModelStates.h>
 #include <gazebo_msgs/ModelState.h>
 #include "nubot_common/OminiVisionInfo.h"
-#include "nubot_common/VelCmd.h"
-#include "nubot_common/Shoot.h"
-#include "nubot_common/BallHandle.h"
+#include "fukuro_common/VelCmd.h"
+#include "fukuro_common/SimShoot.h"
+#include "fukuro_common/SimBallHandle.h"
 #include <std_msgs/Float64MultiArray.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Twist.h>
@@ -163,19 +163,19 @@ enum nubot_substate
 
         /// \brief VelCmd message CallBack function
         /// \param[in] cmd VelCmd msg shared pointer
-        void vel_cmd_CB(const nubot_common::VelCmd::ConstPtr& cmd);
+        void vel_cmd_CB(const fukuro_common::VelCmd::ConstPtr& cmd);
 
         /// \brief Ball handling service
         /// \param[in] req ball handle service request
         /// \param[out] res ball handle service response
-        bool ball_handle_control_service(nubot_common::BallHandle::Request  &req,
-                                      nubot_common::BallHandle::Response &res);
+        bool ball_handle_control_service(fukuro_common::SimBallHandle::Request  &req,
+                                      fukuro_common::SimBallHandle::Response &res);
 
         /// \brief Ball shooting service
         /// \param[in] req ball handle service request
         /// \param[out] res ball handle service response
-        bool shoot_control_servive(nubot_common::Shoot::Request  &req,
-                                 nubot_common::Shoot::Response &res);
+        bool shoot_control_servive(fukuro_common::SimShoot::Request  &req,
+                                 fukuro_common::SimShoot::Response &res);
 
         /// \brief Custom message callback queue thread
         void message_queue_thread();
