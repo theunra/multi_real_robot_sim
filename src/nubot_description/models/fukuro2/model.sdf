@@ -21,7 +21,7 @@
             <pose>0 0 0 0 0 0</pose>
             <geometry>
                <mesh>
-                  <scale>1.5 1.5 1.6</scale>
+                  <scale>1.11 1.11 1.11</scale>
                   <uri>file://meshes/nubot_frame_collision.dae</uri>
                </mesh>
             </geometry>
@@ -41,7 +41,7 @@
             <pose>0 0 0 0 0 0</pose>
             <geometry>
                <mesh>
-                  <scale>1.5 1.5 1.6</scale>
+                  <scale>1.11 1.11 1.11</scale>
                   <uri>file://meshes/nubot_frame/nubot_frame2.dae</uri>
                </mesh>
             </geometry>

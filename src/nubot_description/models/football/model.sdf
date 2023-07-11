@@ -49,7 +49,7 @@
          <visual name="visual">
             <geometry>
                <mesh>
-                  <scale>0.11 0.11 0.11</scale>
+                  <scale>0.09 0.09 0.09</scale>
                   <uri>file://meshes/ball.dae</uri>
                </mesh>
             </geometry>
